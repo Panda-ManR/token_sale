@@ -23,21 +23,22 @@ contract DappTokenSale {
 
     function buyTokens(uint256 _numberOfTokens) public payable {
         require(msg.value == multiply(_numberOfTokens, tokenPrice));
-        require(tokenContract.balanceOf(this) >= _numberOfTokens);
+        require(tokenContract.balanceOf(address(this)) >= _numberOfTokens);
         require(tokenContract.transfer(msg.sender, _numberOfTokens));
 
         tokensSold += _numberOfTokens;
 
-        Sell(msg.sender, _numberOfTokens);
+        emit Sell(msg.sender, _numberOfTokens);
     }
 
-    function endSale() public {
+    function endSale() public payable{
         require(msg.sender == admin);
-        require(tokenContract.transfer(admin, tokenContract.balanceOf(this)));
+        require(tokenContract.transfer(admin, tokenContract.balanceOf(address(this))));
 
         // UPDATE: Let's not destroy the contract here
         // Just transfer the balance to the admin
-        admin.transfer(address(this).balance);
+        address payable _admin = address (uint160(admin));
+        _admin.transfer(address(this).balance);
     }
 }
 
